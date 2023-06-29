@@ -70,6 +70,7 @@ const createOrder = async (req, res) => {
       total,
     } = items;
 
+    let { paymentId, paymentMode } = paymentInfo;
     // if (!isValidObjectId(productId)) {
     //   return res
     //     .status(400)
@@ -121,6 +122,9 @@ const createOrder = async (req, res) => {
       orderData.grandTotal += items[i].total;
     }
 
+    orderData.paymentInfo.paymentId = generateRandomID(10).toString();
+    orderData.paymentInfo.paymentMode = "COD"
+
     let order = await orderModel.create(orderData);
 
     await cartModel.findOneAndUpdate(
@@ -137,7 +141,7 @@ const createOrder = async (req, res) => {
 };
 
 // UPDATE ORDER
-const updateOrderById = async (req, res) => {
+const cancelOrderById = async (req, res) => {
   try {
     let customerId = req.params.customerId;
     if (!isValidObjectId(customerId)) {
@@ -200,7 +204,7 @@ const updateOrderById = async (req, res) => {
 
     await cartModel.findOneAndUpdate(
       { customerId: customerId },
-      { $set: { items: [], totalPrice: 0, totalItems: 0 } },
+      { $set: {status: "cancelled"} },
       { new: true }
     );
 
@@ -212,4 +216,4 @@ const updateOrderById = async (req, res) => {
   }
 };
 
-module.exports = { createOrder, updateOrderById };
+module.exports = { createOrder, cancelOrderById };

@@ -1,6 +1,10 @@
 const order1Model = require("../models/order1Model");
 const productModel = require("../models/productModel");
 const customerModel = require("../models/customerModel");
+const {
+  generateRandomID,
+  generateRandomAlphaNumericID,
+} = require("../controllers/idGeneratorController");
 
 const cartModel = require("../models/cartModel");
 const { isValidObjectId } = require("mongoose");
@@ -71,6 +75,8 @@ const newOrder = async (req, res) => {
       total,
     } = items;
 
+    let { paymentId, paymentMode } = paymentInfo;
+
     // if (!isValidObjectId(productId)) {
     //   return res
     //     .status(400)
@@ -98,8 +104,9 @@ const newOrder = async (req, res) => {
       items,
       grandTotal: 0,
       status,
-      paymentInfo,
+      paymentInfo
     };
+
 
     let products = await productModel.find();
   
@@ -121,7 +128,16 @@ const newOrder = async (req, res) => {
     for (let i=0; i<items.length; i++) {
       orderData.grandTotal += items[i].total;
     }
+
+    orderData.paymentInfo.paymentId = generateRandomID(10).toString();
+    orderData.paymentInfo.paymentMode = "COD"
     
+    // console.log(typeof num)
+    // paymentInfo.paymentId = generateRandomID(10).toString();
+    // paymentInfo.paymentMode = "COD";
+    
+
+    console.log(orderData.paymentInfo.paymentMode);
     // console.log(orderData.grandTotal);
     // orderData.grandTotal += items[i].total;
     
@@ -140,171 +156,6 @@ const newOrder = async (req, res) => {
   }
 };
 
-// const newOrder = async (req, res) => {
-//     try {
-//         const {
-//             shippingInfo,
-//             orderItems,
-//             paymentInfo,
-//             itemsPrice,
-//             taxPrice,
-//             shippingPrice,
-//             totalPrice,
-//           } = req.body;
 
-//           const order = await order1Model.create({
-//             shippingInfo,
-//             orderItems,
-//             paymentInfo,
-//             itemsPrice,
-//             taxPrice,
-//             shippingPrice,
-//             totalPrice,
-//             paidAt: Date.now(),
-//           });
-
-//           res.status(201).json({
-//             success: true,
-//             order,
-//           });
-//     } catch (error) {
-//         return res.status(500).send({ status: false, message: error.message })
-//     }
-// }
-
-// module.exports = { newOrder }
-
-// // Create new Order
-// exports.newOrder = catchAsyncErrors(async (req, res, next) => {
-//   const {
-//     shippingInfo,
-//     orderItems,
-//     paymentInfo,
-//     itemsPrice,
-//     taxPrice,
-//     shippingPrice,
-//     totalPrice,
-//   } = req.body;
-
-//   const order = await Order.create({
-//     shippingInfo,
-//     orderItems,
-//     paymentInfo,
-//     itemsPrice,
-//     taxPrice,
-//     shippingPrice,
-//     totalPrice,
-//     paidAt: Date.now(),
-//     user: req.user._id,
-//   });
-
-//   res.status(201).json({
-//     success: true,
-//     order,
-//   });
-// });
-
-// get Single Order
-// exports.getSingleOrder = catchAsyncErrors(async (req, res, next) => {
-//   const order = await Order.findById(req.params.id).populate(
-//     "user",
-//     "name email"
-//   );
-
-//   if (!order) {
-//     return next(new ErrorHander("Order not found with this Id", 404));
-//   }
-
-//   res.status(200).json({
-//     success: true,
-//     order,
-//   });
-// });
-
-// // get logged in user  Orders
-// exports.myOrders = catchAsyncErrors(async (req, res, next) => {
-//   const orders = await Order.find({ user: req.user._id });
-
-//   res.status(200).json({
-//     success: true,
-//     orders,
-//   });
-// });
-
-// // get all Orders -- Admin
-// exports.getAllOrders = catchAsyncErrors(async (req, res, next) => {
-//   const orders = await Order.find();
-
-//   let totalAmount = 0;
-
-//   orders.forEach((order) => {
-//     totalAmount += order.totalPrice;
-//   });
-
-//   res.status(200).json({
-//     success: true,
-//     totalAmount,
-//     orders,
-//   });
-// });
-
-// // update Order Status -- Admin
-// exports.updateOrder = catchAsyncErrors(async (req, res, next) => {
-//   const order = await Order.findById(req.params.id);
-
-//   if (!order) {
-//     return next(new ErrorHander("Order not found with this Id", 404));
-//   }
-
-//   if (order.orderStatus === "Delivered") {
-//     return next(new ErrorHander("You have already delivered this order", 400));
-//   }
-
-//   if (req.body.status === "Shipped") {
-//     order.orderItems.forEach(async (o) => {
-//       await updateStock(o.product, o.quantity);
-//     });
-//   }
-//   order.orderStatus = req.body.status;
-
-//   if (req.body.status === "Delivered") {
-//     order.deliveredAt = Date.now();
-//   }
-
-//   await order.save({ validateBeforeSave: false });
-//   res.status(200).json({
-//     success: true,
-//   });
-// });
-
-// async function updateStock(id, quantity) {
-//   const product = await Product.findById(id);
-
-//   product.Stock -= quantity;
-
-//   await product.save({ validateBeforeSave: false });
-// }
-
-// // delete Order -- Admin
-// exports.deleteOrder = catchAsyncErrors(async (req, res, next) => {
-//   const order = await Order.findById(req.params.id);
-
-//   if (!order) {
-//     return next(new ErrorHander("Order not found with this Id", 404));
-//   }
-
-//   await order.remove();
-
-//   res.status(200).json({
-//     success: true,
-//   });
-// });
-
-// data.items.netValue = (grossValue - discount);
-    // data.items.cgstValue = (cgstRate/100) * data.items.netValue;
-    // data.items.sgstRate = cgstRate;
-
-    // data.items.sgstValue = (data.items.sgstRate/100) * data.items.netValue;
-    // data.items.total = (data.items.netValue + data.items.cgstValue + data.items.sgstValue);
 
 module.exports = { newOrder };
