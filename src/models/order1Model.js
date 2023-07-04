@@ -31,7 +31,6 @@ const orderSchema = new mongoose.Schema(
 
     invoiceNumber: {
       type: String,
-      required: true,
     },
 
     invoiceDate: {

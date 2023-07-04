@@ -12,7 +12,7 @@ const paymentController = require('../controllers/paymentController');
 const userController = require('../controllers/userController');
 const ratingController = require('../controllers/ratingController');
 const dashboardController = require('../controllers/dashboardController');
-// const OTPController = require('../controllers/OPTController');
+const checkoutCODController = require('../controllers/CODController');
 const testController = require('../controllers/testController');
 
 const { Authentication, Authorization } = require('../middlewares/auth')
@@ -74,5 +74,9 @@ router.post("/customer/:customerId/verifypayment", paymentController.verifyPayme
 // USER API
 router.post("/sendotp", userController.userSignup);
 router.post("/verifyotp", userController.verifyOTP);
+
+
+// CHECKOUT COD API
+router.post("/checkoutcod", checkoutCODController.checkoutCOD);
 
 module.exports = router;

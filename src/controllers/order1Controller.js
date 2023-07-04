@@ -77,12 +77,6 @@ const newOrder = async (req, res) => {
 
     let { paymentId, paymentMode } = paymentInfo;
 
-    // if (!isValidObjectId(productId)) {
-    //   return res
-    //     .status(400)
-    //     .send({ status: false, message: "Invalid product id" });
-    // }
-
     if (quantity) {
       if (typeof quantity !== "number" || quantity <= 0) {
         return res
@@ -96,7 +90,7 @@ const newOrder = async (req, res) => {
       restaurantAddress,
       restaurantGSTIN,
       restaurantFSSAI,
-      invoiceNumber,
+      invoiceNumber: generateRandomID(10),
       invoiceDate: new Date().toLocaleString(),
       customerName,
       deliveryAddress,
@@ -113,7 +107,7 @@ const newOrder = async (req, res) => {
     for (let i=0; i<items.length; i++) {
       for (let j = 0; j < products.length; j++) {
         if ( items[i].productId === products[j]._id.toString()) {
-          items[i].grossValue = items[i].quantity * products[j].price;
+          items[i].grossValue = items[i].quantity * products[j].mrp;
         }
       }
       
@@ -122,7 +116,7 @@ const newOrder = async (req, res) => {
       items[i].sgstRate = items[i].cgstRate;
       items[i].sgstValue = (items[i].sgstRate / 100) * items[i].netValue;
       items[i].total =
-        items[i].netValue + items[i].cgstValue + items[i].sgstValue; 
+        items[i].netValue + items[i].cgstValue + items[i].sgstValue;
     }
 
     for (let i=0; i<items.length; i++) {
@@ -136,17 +130,12 @@ const newOrder = async (req, res) => {
     // paymentInfo.paymentId = generateRandomID(10).toString();
     // paymentInfo.paymentMode = "COD";
     
-
-    console.log(orderData.paymentInfo.paymentMode);
+    // console.log(items[0]);
+    // console.log(items[0].quantity, products[0].mrp, items[0].quantity * products[0].mrp);
     // console.log(orderData.grandTotal);
     // orderData.grandTotal += items[i].total;
     
     let order = await order1Model.create(orderData);
-
-    await cartModel.findOneAndUpdate(
-      { customerId: customerId },
-      { items: [], totalPrice: 0, totalItems: 0 }
-    );
 
     return res
       .status(201)
@@ -155,7 +144,6 @@ const newOrder = async (req, res) => {
     return res.status(500).send({ status: false, message: error.message });
   }
 };
-
 
 
 module.exports = { newOrder };

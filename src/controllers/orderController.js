@@ -107,7 +107,7 @@ const createOrder = async (req, res) => {
     for (let i = 0; i < items.length; i++) {
       for (let j = 0; j < products.length; j++) {
         if (items[i].productId === products[j]._id.toString()) {
-          items[i].grossValue = items[i].quantity * products[j].price;
+          items[i].grossValue = items[i].quantity * products[j].mrp;
         }
       }
 
