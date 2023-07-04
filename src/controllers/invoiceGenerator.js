@@ -1,39 +1,56 @@
+let invoiceModel = require("../models/invoiceModel");
 
+let invoiceNumber = 1;
 
-// Middleware to parse JSON bodies
-app.use(express.json());
+// Generate a 6-digit invoice number
+function generateInvoiceNumber() {
+  const paddedNumber = String(invoiceNumber).padStart(6, "0");
+  return `INV-${paddedNumber}`;
+}
 
-// Endpoint to generate a new invoice number
-app.post("/invoices", (req, res) => {
-  const brandName = "JB";
-  const currentDate = new Date();
-  const year = currentDate.getFullYear().toString();
-  const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
-  const day = currentDate.getDate().toString().padStart(2, "0");
+// API endpoint to get the next invoice number
+const getInvoiceNumber = async (req, res) => {
+  let data = req.body;
+  let { digits } = data;
+  let lastInvoiceNumber = await invoiceModel.findOne({
+    invoiceNumber: invoiceNumber,
+  });
 
-  // Retrieve the last invoice number from a database or storage
-  let lastInvoiceNumber = retrieveLastInvoiceNumber(); // Replace with your own logic to retrieve the last invoice number
+  if (!lastInvoiceNumber) {
+    let num = 1;
+    let paddedNumber = String(num).padStart(digits, "0");
 
-  let invoiceNumber;
-  if (lastInvoiceNumber) {
-    // Extract the numeric part and increment it
-    const numericPart = lastInvoiceNumber.substring(10);
-    const incrementedNumericPart = (
-      parseInt(numericPart) + 1
-    ).toString().padStart(4, "0");
-
-    // Concatenate the brand name, current date, and the updated numeric part
-    invoiceNumber = brandName + month + day + year + incrementedNumericPart;
+    let invoiceData = {
+      digits,
+      invoiceNumber: paddedNumber,
+    };
+    // invoiceNumber = paddedNumber.toString();
+    // console.log('Hello example', invoiceNumber);
+    let newInvoiceNumber = await invoiceModel.create(invoiceData);
+    return res
+      .status(201)
+      .send({ status: true, message: "success", data: newInvoiceNumber });
   } else {
-    // Set initial invoice number
-    invoiceNumber = brandName + month + day + year + "0001";
+    // let num =1;
+    invoiceNumber++;
+    await lastInvoiceNumber.save();
+    // invoiceNumber = String(num).padStart(digits, "0")
+    // console.log('Hello example', invoiceNumber);
+    return res.status(201).send({ status: true, invoiceNumber: invoiceNumber });
   }
+};
 
-  // Save the updated invoice number to the database or storage
-  saveInvoiceNumber(invoiceNumber); // Replace with your own logic to save the invoice number
+module.exports = { getInvoiceNumber };
 
-  res.status(200).json({ invoiceNumber });
-});
+// let invoiceNumber = 1;
 
-
-
+// function generateInvoiceNumber() {
+//   const paddedNumber = String(invoiceNumber).padStart(6, '0');
+//   const invoice = `INV-${paddedNumber}`;
+//   invoiceNumber++;
+//   return invoice;
+// }
+// console.log(generateInvoiceNumber());
+// console.log(generateInvoiceNumber());
+// console.log(generateInvoiceNumber());
+// console.log(generateInvoiceNumber());

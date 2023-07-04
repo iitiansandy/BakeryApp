@@ -75,6 +75,15 @@ const newOrder = async (req, res) => {
       total,
     } = items;
 
+    if (discount > grossValue) {
+      return res
+        .status(400)
+        .send({
+          status: false,
+          message: "Discount can not be greater than gross value",
+        });
+    }
+
     let { paymentId, paymentMode } = paymentInfo;
 
     if (quantity) {
@@ -98,19 +107,18 @@ const newOrder = async (req, res) => {
       items,
       grandTotal: 0,
       status,
-      paymentInfo
+      paymentInfo,
     };
 
-
     let products = await productModel.find();
-  
-    for (let i=0; i<items.length; i++) {
+
+    for (let i = 0; i < items.length; i++) {
       for (let j = 0; j < products.length; j++) {
-        if ( items[i].productId === products[j]._id.toString()) {
+        if (items[i].productId === products[j]._id.toString()) {
           items[i].grossValue = items[i].quantity * products[j].mrp;
         }
       }
-      
+
       items[i].netValue = items[i].grossValue - items[i].discount;
       items[i].cgstValue = (items[i].cgstRate / 100) * items[i].netValue;
       items[i].sgstRate = items[i].cgstRate;
@@ -119,22 +127,22 @@ const newOrder = async (req, res) => {
         items[i].netValue + items[i].cgstValue + items[i].sgstValue;
     }
 
-    for (let i=0; i<items.length; i++) {
+    for (let i = 0; i < items.length; i++) {
       orderData.grandTotal += items[i].total;
     }
 
     orderData.paymentInfo.paymentId = generateRandomID(10).toString();
-    orderData.paymentInfo.paymentMode = "COD"
-    
+    orderData.paymentInfo.paymentMode = "COD";
+
     // console.log(typeof num)
     // paymentInfo.paymentId = generateRandomID(10).toString();
     // paymentInfo.paymentMode = "COD";
-    
+
     // console.log(items[0]);
     // console.log(items[0].quantity, products[0].mrp, items[0].quantity * products[0].mrp);
     // console.log(orderData.grandTotal);
     // orderData.grandTotal += items[i].total;
-    
+
     let order = await order1Model.create(orderData);
 
     return res
@@ -144,6 +152,5 @@ const newOrder = async (req, res) => {
     return res.status(500).send({ status: false, message: error.message });
   }
 };
-
 
 module.exports = { newOrder };

@@ -3,7 +3,7 @@ const admin = require("firebase-admin");
 const bodyParser = require("body-parser");
 
 // Initialize Firebase Admin SDK
-const serviceAccount = require("../middlewares/serviceAccountKeys.json");
+const serviceAccount = require("../middlewares");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });

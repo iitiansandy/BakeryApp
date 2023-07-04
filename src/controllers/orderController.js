@@ -4,7 +4,7 @@ const productModel = require("../models/productModel");
 const cartModel = require("../models/cartModel");
 const { isValidObjectId } = require("mongoose");
 const { isValidRequestBody, isValidStatus } = require("../utils/utils");
-const { generateRandomID } = require('../controllers/idGeneratorController');
+const { generateRandomID } = require("../controllers/idGeneratorController");
 
 // CREATE ORDER
 const createOrder = async (req, res) => {
@@ -97,7 +97,7 @@ const createOrder = async (req, res) => {
       deliveryAddress,
       hsn,
       items,
-      grandTotal:0,
+      grandTotal: 0,
       status,
       paymentInfo,
     };
@@ -119,20 +119,14 @@ const createOrder = async (req, res) => {
         items[i].netValue + items[i].cgstValue + items[i].sgstValue;
     }
 
-    for (let i=0; i<items.length; i++) {
+    for (let i = 0; i < items.length; i++) {
       orderData.grandTotal += items[i].total;
     }
 
     orderData.paymentInfo.paymentId = generateRandomID(10).toString();
-    orderData.paymentInfo.paymentMode = "COD"
+    orderData.paymentInfo.paymentMode = "COD";
 
     let order = await orderModel.create(orderData);
-
-    await cartModel.findOneAndUpdate(
-      { customerId: customerId },
-      { items: [], totalPrice: 0, totalItems: 0 }
-    );
-
     return res
       .status(201)
       .send({ status: true, message: "Success", data: order });
@@ -141,95 +135,49 @@ const createOrder = async (req, res) => {
   }
 };
 
-// // UPDATE ORDER
-// const cancelOrderById = async (req, res) => {
-//   try {
-//     let customerId = req.params.customerId;
-//     if (!isValidObjectId(customerId)) {
-//       return res
-//         .status(400)
-//         .send({ status: false, message: "Invalid customer id" });
-//     }
-//     let data = req.body;
-//     if (!isValidRequestBody(data)) {
-//       return res
-//         .status(400)
-//         .send({ status: false, message: "Please enter data in body" });
-//     }
-
-//     let { status, orderId } = data;
-
-//     let customer = await customerModel.findOne({ _id: customerId });
-
-//     if (!customer) {
-//       return res
-//         .status(404)
-//         .send({ status: false, message: "Customer not found" });
-//     }
-
-//     if (!isValidObjectId(orderId)) {
-//       return res
-//         .status(400)
-//         .send({ status: false, message: "Invalid order id" });
-//     }
-
-//     let order = await orderModel.findOne({ _id: orderId });
-
-//     if (!order) {
-//       return res
-//         .status(404)
-//         .send({ status: false, message: "Order not found" });
-//     }
-
-//     let orderCustomerId = order.customerId.toString();
-
-//     if (orderCustomerId !== customerId) {
-//       return res.status(400).send({
-//         status: false,
-//         message: "This order does not belong to this customer",
-//       });
-//     }
-
-//     if (!isValidStatus(status)) {
-//       return res.status(400).send({
-//         status: false,
-//         message: "status should be only - 'pending', 'complete' or 'cancled'",
-//       });
-//     }
-
-//     let orderStatus = await orderModel.findOneAndUpdate(
-//       { _id: orderId },
-//       { $set: data },
-//       { new: true }
-//     );
-
-//     await cartModel.findOneAndUpdate(
-//       { customerId: customerId },
-//       { $set: {status: "cancelled"} },
-//       { new: true }
-//     );
-
-//     return res
-//       .status(200)
-//       .send({ status: true, message: "Success", data: orderStatus });
-//   } catch (error) {
-//     return res.status(500).send({ status: false, message: error.message });
-//   }
-// };
 
 
 // CANCEL ORDER BY ORDER ID
-
 const cancelOrderById = async (req, res) => {
   try {
     let orderId = req.params.orderId;
     if (!isValidObjectId(orderId)) {
-      return res.status(400).send({ status: false, message: 'Invalid order id'})
+      return res
+        .status(400)
+        .send({ status: false, message: "Invalid order id" });
     }
 
+    let data = req.body;
+
+    let { status } = data;
+
+    let order = await orderModel.findOne({ _id: orderId });
+
+    if (!order) {
+      return res
+        .status(404)
+        .send({ status: false, message: "Order not found" });
+    }
+
+    if (!isValidStatus(status)) {
+      return res.status(400).send({
+        status: false,
+        message: "status should be only - 'pending', 'complete' or 'cancled'",
+      });
+    }
+
+    let orderStatus = await orderModel.findOneAndUpdate(
+      { _id: orderId },
+      { $set: { status: "cancelled" } },
+      { new: true }
+    );
+
+    return res
+      .status(200)
+      .send({ status: true, message: "Order cancelled successfully" });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
-}
+};
 
 module.exports = { createOrder, cancelOrderById };

@@ -100,13 +100,13 @@ const loginAdmin = async (req, res) => {
         .send({ status: false, message: "password is required" });
     }
 
-    if (!isValidPassword(password)) {
-      return res.status(400).send({
-        status: false,
-        message: `Password must include atleast one special character[@$!%?&], one uppercase, one 
-      lowercase, one number and should be mimimum 12 to 25 characters long for Example: Password@123`,
-      });
-    }
+    // if (!isValidPassword(password)) {
+    //   return res.status(400).send({
+    //     status: false,
+    //     message: `Password must include atleast one special character[@$!%?&], one uppercase, one 
+    //   lowercase, one number and should be mimimum 12 to 25 characters long for Example: Password@123`,
+    //   });
+    // }
 
     let admin = await adminModel.findOne({ email: email });
 
