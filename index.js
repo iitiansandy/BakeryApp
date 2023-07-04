@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const fileUpload = require('express-fileupload');
 // const chalk = require('chalk');
 const app = express();
 const route = require("./src/routes/routes");
@@ -10,6 +11,7 @@ const cors = require('cors');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(fileUpload());
 app.use(cors());
 
 

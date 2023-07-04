@@ -5,42 +5,138 @@ const customerModel = require("../models/customerModel");
 const { isValid } = require("../utils/utils");
 
 // ADD RATING
-const addRating = async (req, res) => {
+// const addRating = async (req, res) => {
+//   try {
+//     let data = req.body;
+
+//     let { productId, customers } = data;
+
+//     let { customerId, rating, comment } = customers;
+
+//     let ratingData = {
+//       productId,
+//       customers
+//     };
+
+//     let isRatingExists = await ratingModel.findOne({
+//       productId: productId,
+//       customerId: customers.customerId,
+//     });
+
+//     if (isRatingExists) {
+//       return res.status(400).send({
+//         status: false,
+//         message: "This customer has already given rating to this product",
+//       });
+//     } else {
+//       let newRating = await ratingModel.create(ratingData);
+
+//       return res
+//         .status(201)
+//         .send({ status: true, message: "success", data: newRating });
+//     }
+//   } catch (error) {
+//     return res.status(500).send({ status: false, message: error.message });
+//   }
+// };
+
+
+// CREATE RATING
+// Assuming you have the necessary dependencies and models imported
+
+// Add a rating for a product
+// async function addRating(req, res) {
+//   try {
+//     // Extract the rating details from the request body
+//     const { productId, customerId, rating, comment } = req.body;
+
+//     // Check if the product and customer exist
+//     const product = await productModel.findById(productId);
+//     const customer = await customerModel.findById(customerId);
+//     // const productRating = await ratingModel.findById(productId);
+//     // console.log('Hello example', productRating);
+
+//     if (!product) {
+//       return res.status(404).json({ error: "Product not found." });
+//     }
+
+//     if (!customer) {
+//       return res.status(404).json({ error: "Customer not found." });
+//     }
+
+//     // Create the rating object
+//     const newRating = {
+//       customerId,
+//       rating,
+//       comment,
+//     };
+
+//     // Add the rating to the product's ratings array
+//     productRating.ratings.push(newRating);
+//     await productRating.save();
+
+//     // Return the updated product with the added rating
+//     res.status(200).json(productRating);
+//   } catch (error) {
+//     // Handle any errors that occur during the process
+//     console.error("Error adding rating:", error);
+//     res.status(500).json({ error: "Failed to add rating." });
+//   }
+// }
+
+
+
+// ADD OR UPDATE A RATING FOR A PRODUCT
+async function addRating(req, res) {
   try {
-    let data = req.body;
+    const { productId, customerId, rating, comment } = req.body;
 
-    let { productId, rating, comment, commentedBy } = data;
+    // Check if the product and customer exist
+    const product = await productModel.findById(productId);
+    const customer = await customerModel.findById(customerId);
 
-    let ratingData = {
-      productId,
-      rating,
-      comment,
-      commentedBy,
-    };
-
-    let isRatingExists = await ratingModel.findOne({
-      productId: productId,
-      commentedBy: commentedBy,
-    });
-
-    if (isRatingExists) {
-      return res.status(400).send({
-        status: false,
-        message: "This customer has already given rating to this product",
-      });
-    } else {
-      let newComment = await (
-        await ratingModel.create(ratingData)
-      ).populate("commentedBy");
-
-      return res
-        .status(201)
-        .send({ status: true, message: "success", data: newComment });
+    if (!product) {
+      return res.status(404).json({ error: "Product not found." });
     }
+
+    if (!customer) {
+      return res.status(404).json({ error: "Customer not found." });
+    }
+
+    // Check if the customer has already rated the product
+    const existingRating = product.ratings.find(
+      (rating) => rating.customerId.toString() === customerId
+    );
+
+    if (existingRating) {
+      // Update the existing rating
+      existingRating.rating = rating;
+      existingRating.comment = comment;
+    } else {
+      // Add a new rating
+      product.ratings.push({ customerId, rating, comment });
+    }
+
+    // Calculate the new average rating and total rating counts
+    const ratings = product.ratings;
+    const totalRatingCount = ratings.length;
+    const sumRatings = ratings.reduce((sum, rating) => sum + rating.rating, 0);
+    const averageRating = totalRatingCount > 0 ? sumRatings / totalRatingCount : 0;
+
+    // Update the averageRating and totalRatingCount fields in the product
+    product.averageRating = averageRating;
+    product.totalRatingCount = totalRatingCount;
+
+    // Save the product
+    await product.save();
+
+    res.status(200).json(product);
   } catch (error) {
-    return res.status(500).send({ status: false, message: error.message });
+    console.error("Error adding rating:", error);
+    res.status(500).json({ error: "Failed to add rating." });
   }
-};
+}
+
 
 // GET ALL RATINGS
 const getAllRatings = async (req, res) => {
@@ -56,16 +152,36 @@ const getAllRatings = async (req, res) => {
 
     let averageRating;
     let ratingSum = 0;
+    let totalRatingCount;
     for (let i = 0; i < ratings.length; i++) {
       ratingSum += ratings[i].rating;
     }
     averageRating = ratingSum / ratings.length;
+    totalRatingCount = ratings.length;
     return res
       .status(200)
-      .send({ status: true, data: ratings, averageRating: averageRating });
+      .send({
+        status: true,
+        data: ratings,
+        averageRating: averageRating,
+        totalRatingCount: totalRatingCount,
+      });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
 };
 
-module.exports = { addRating, getAllRatings };
+// GET ALL PRODUCTS WITH RATING
+const getAllProductsWithRating = async (req, res) => {
+  try {
+    let productId = req.params.productId;
+    let ratingId = req.params.ratingId;
+
+    let products = await productModel.find().populate("ratingId");
+    return res.status(200).send({ status: true, data: products });
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+module.exports = { addRating, getAllRatings, getAllProductsWithRating };

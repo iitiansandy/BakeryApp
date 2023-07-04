@@ -1,7 +1,5 @@
-const express = require('express');
 const { initializeApp } = require('firebase/app');
 const { getStorage, ref, getDownloadURL, uploadBytesResumable } = require('firebase/storage');
-const multer = require('multer');
 const config = require('../middlewares/firebase');
 
 //Initialize a firebase application
@@ -11,35 +9,29 @@ initializeApp(config.firebaseConfig);
 const storage = getStorage();
 
 // Setting up multer as a middleware to grab photo uploads
-const upload = multer({ storage: multer.memoryStorage() });
 
 
-const uploadImage = async (req, res) => {
-    try {
+const uploadImage = async (blobFile) => {
         const dateTime = giveCurrentDateTime();
-
-        const storageRef = ref(storage, `files/${req.file.originalname + " " + dateTime}`);
-
-        // Create file metadata including the content type
+        const storageRef = ref(storage, `files/${dateTime.toString().replace(" ","_")+"_"+blobFile.name.replace(" ","_")}`);
+    
+        // // Create file metadata including the content type
         const metadata = {
-            contentType: req.file.mimetype,
+            contentType: blobFile.mimetype,
         };
 
-        // Upload the file in the bucket storage
-        const snapshot = await uploadBytesResumable(storageRef, req.file.buffer, metadata);
+        // // Upload the file in the bucket storage
+        const snapshot = await uploadBytesResumable(storageRef, blobFile.data, metadata);
         //by using uploadBytesResumable we can control the progress of uploading like pause, resume, cancel
-
+        
         // Grab the public url
         const downloadURL = await getDownloadURL(snapshot.ref);
-        return res.send({
+        return {
             message: 'file uploaded to firebase storage',
-            name: req.file.originalname,
-            type: req.file.mimetype,
-            downloadURL: downloadURL
-        })
-    } catch (error) {
-        return res.status(400).send(error.message)
-    }
+            name: snapshot.metadata.name,
+            type: blobFile.mimetype,
+            imageURL: downloadURL
+        };
 };
 
 const giveCurrentDateTime = () => {
@@ -50,5 +42,4 @@ const giveCurrentDateTime = () => {
     return dateTime;
 }
 
-
-module.exports = { upload, uploadImage }
+module.exports = { uploadImage }

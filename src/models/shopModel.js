@@ -2,11 +2,6 @@ const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const shopSchema = new mongoose.Schema({
-    adminId: {
-        type: ObjectId,
-        ref: 'Admin'
-    },
-
     shopNumber: {
         type: Number,
         required: true,
@@ -15,7 +10,6 @@ const shopSchema = new mongoose.Schema({
 
     shopAddress: {
         type: String,
-        required: true,
         unique: true
     },
 
@@ -24,7 +18,17 @@ const shopSchema = new mongoose.Schema({
         ref: 'Product'
     },
 
-    products: []
+    banners: {
+        type: String,
+    },
+
+    helplineNumber: {
+        type: String,
+    },
+
+    description: {
+        type: String,
+    }
 }, 
 {timestamps: true});
 

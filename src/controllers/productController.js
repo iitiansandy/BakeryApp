@@ -1,51 +1,79 @@
 const { isValidObjectId } = require("mongoose");
 const productModel = require("../models/productModel");
+const ratingModel = require("../models/ratingModel");
+const customerModel = require("../models/customerModel");
+const { uploadImage } = require('../controllers/imageController');
 const { isValid, isValidRequestBody, isValidImg } = require("../utils/utils");
 
 // ADD PRODUCT
-const addProduct = async (req, res) => {
+const createProduct = async (req, res) => {
   try {
-    let data = req.body;
-
-    let { title, description, price, productImage, adminId, shopId } = data;
-
-    if (!isValid(title)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Product title is required" });
-    }
-
-    if (!isValid(price)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Price is required" });
-    }
-
-    let productData = {
-      title,
+    const {
+      skuCode,
+      isVeg,
+      name,
       description,
-      price,
-      productImage,
-      adminId,
-      shopId
-    };
+      qty,
+      salePrice,
+      mrp
+    } = req.body;
 
-    let product = await productModel.create(productData);
+    let { images } = req.files;
 
-    return res.status(201).send({
-      status: false,
-      message: "product added successfully",
-      data: product,
+    let img = await uploadImage(images);
+
+    thumbnail = img.imageURL;
+
+  
+    // Create the product
+    const product = await productModel.create({
+      skuCode,
+      isVeg,
+      name,
+      description,
+      qty,
+      salePrice,
+      mrp,
+      thumbnail,
+    });
+    
+    // Calculate average rating and total rating counts
+    const ratings = await ratingModel.aggregate([
+      { $match: { productId: product._id } },
+      {
+        $group: {
+          _id: null,
+          averageRating: { $avg: "$customers.rating" },
+          totalRatingCount: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const averageRating = ratings.length > 0 ? ratings[0].averageRating : 0;
+    const totalRatingCount =
+      ratings.length > 0 ? ratings[0].totalRatingCount : 0;
+
+    // Update the averageRating and totalRatingCount fields in the product
+    product.averageRating = averageRating;
+    product.totalRatingCount = totalRatingCount;
+    await product.save();
+
+    // Return the created product with average rating and total rating counts
+    res.status(201).json({
+      product,
+      averageRating,
+      totalRatingCount,
     });
   } catch (error) {
-    return res.status(500).send({ status: false, message: error.message });
+    // Handle any errors that occur during the process
+    res.status(500).json({ error: "Failed to create product." });
   }
-};
+}
 
 // GET ALL PRODUCTS
 const getAllProducts = async (req, res) => {
   try {
-    let products = await productModel.find();
+    let products = await productModel.find({isDeleted: false});
 
     if (!products.length) {
       return res
@@ -86,34 +114,34 @@ const updateProductById = async (req, res) => {
         .send({ status: false, message: "Please enter data in request body" });
     }
 
-    if ("title" in body) {
-      product.title = body.title;
+    if ("name" in body) {
+      product.name = body.name;
     }
 
     if ("description" in body) {
       product.description = body.description;
     }
 
-    if ("price" in body) {
-      product.price = body.price;
+    if ("salePrice" in body) {
+      product.salePrice = body.salePrice;
     }
 
-    if (typeof productImage === "string" || typeof productImage === "object")
-      return res
-        .status(400)
-        .send({ status: false, message: "ProductImg should be of typeFiles" });
-
-    if (files && files.length > 0) {
-      if (!isValidImg(files[0].mimetype)) {
-        return res.status(400).send({
-          status: false,
-          message: "Image Should be of JPEG/ JPG/ PNG",
-        });
-      }
-      let uploadedFileURL = await uploadFile(files[0]);
-      product.productImage = uploadedFileURL;
+    if ("skuCode" in body){
+      product.skuCode = body.skuCode
     }
 
+    if ("isVeg" in body) {
+      product.isVeg = body.isVeg;
+    }
+
+    if ("qty" in body) {
+      product.qty = body.qty
+    }
+    
+    if ("mrp" in body) {
+      product.mrp = body.mrp
+    }
+   
     await product.save();
 
     return res.status(200).send({
@@ -140,12 +168,10 @@ const deleteProductById = async (req, res) => {
     let deleteProduct = await productModel.deleteOne({ _id: productId });
 
     if (!deleteProduct) {
-      return res
-        .status(404)
-        .send({
-          status: false,
-          message: "Product not found or already deleted",
-        });
+      return res.status(404).send({
+        status: false,
+        message: "Product not found or already deleted",
+      });
     }
 
     return res
@@ -157,7 +183,7 @@ const deleteProductById = async (req, res) => {
 };
 
 module.exports = {
-  addProduct,
+  createProduct,
   getAllProducts,
   updateProductById,
   deleteProductById,

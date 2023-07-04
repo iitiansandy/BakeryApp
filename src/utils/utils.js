@@ -27,7 +27,7 @@ const isValidEmail = function (gmail) {
 
 let isValidPassword = function (password) {
   let regexPassword =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/;
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,25}$/;
   return regexPassword.test(password);
 };
 

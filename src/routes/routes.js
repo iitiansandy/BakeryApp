@@ -1,6 +1,5 @@
 const express = require('express')
-const router = express.Router()
-const multer = require('multer');
+const router = express.Router();
 const adminController = require("../controllers/adminController")
 const customerController = require('../controllers/customerController');
 const productController = require('../controllers/productController');
@@ -12,10 +11,9 @@ const imageController = require('../controllers/imageController');
 const paymentController = require('../controllers/paymentController');
 const userController = require('../controllers/userController');
 const ratingController = require('../controllers/ratingController');
+const dashboardController = require('../controllers/dashboardController');
 // const OTPController = require('../controllers/OPTController');
 const testController = require('../controllers/testController');
-const upload = multer({ storage: multer.memoryStorage() });
-
 
 const { Authentication, Authorization } = require('../middlewares/auth')
 
@@ -26,17 +24,17 @@ router.post("/login", adminController.loginAdmin);
 // CUSTOMER APIs
 router.post("/customer", customerController.signUpCustomer);
 router.post("/logincustomer", customerController.loginCustomer);
-router.post("/send-otp", testController.sendOTP);
-router.post("/verify-otp", testController.verifyOTP);
+router.put("/updatecustomer/:customerId", customerController.updateCustomerById);
+router.delete("/customer/:customerId", customerController.deleteCustomerById);
 
 // router.post("/loginwithotp", OTPController.loginCustomerWithOTP)
 
 // IMAGE API
-router.post("/upload", upload.single('filename'), imageController.uploadImage);
+// router.post("/upload", upload.single('filename'), imageController.uploadImage);
 
 
 // PRODUCT APIs
-router.post("/product", productController.addProduct);
+router.post("/product", productController.createProduct);
 router.get("/products", productController.getAllProducts);
 router.put("/product/:productId", productController.updateProductById);
 router.delete("/product/:productId", productController.deleteProductById);
@@ -58,6 +56,14 @@ router.post("/customer/:customerId/addorder", order1Controller.newOrder);
 // RATING API
 router.post("/addrating", ratingController.addRating);
 router.get("/ratings", ratingController.getAllRatings);
+
+// DASHBOARD API
+router.get("/dashboard", dashboardController.createDashboard);
+
+
+// RATING API
+router.post("/addrating", ratingController.addRating);
+router.get("/ratings/:productId", ratingController.getAllRatings);
 
 
 // PAYMENT API

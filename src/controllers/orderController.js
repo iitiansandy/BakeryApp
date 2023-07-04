@@ -4,6 +4,7 @@ const productModel = require("../models/productModel");
 const cartModel = require("../models/cartModel");
 const { isValidObjectId } = require("mongoose");
 const { isValidRequestBody, isValidStatus } = require("../utils/utils");
+const { generateRandomID } = require('../controllers/idGeneratorController');
 
 // CREATE ORDER
 const createOrder = async (req, res) => {
@@ -90,7 +91,7 @@ const createOrder = async (req, res) => {
       restaurantAddress,
       restaurantGSTIN,
       restaurantFSSAI,
-      invoiceNumber,
+      invoiceNumber: generateRandomID(10),
       invoiceDate: new Date().toLocaleString(),
       customerName,
       deliveryAddress,
@@ -140,80 +141,95 @@ const createOrder = async (req, res) => {
   }
 };
 
-// UPDATE ORDER
+// // UPDATE ORDER
+// const cancelOrderById = async (req, res) => {
+//   try {
+//     let customerId = req.params.customerId;
+//     if (!isValidObjectId(customerId)) {
+//       return res
+//         .status(400)
+//         .send({ status: false, message: "Invalid customer id" });
+//     }
+//     let data = req.body;
+//     if (!isValidRequestBody(data)) {
+//       return res
+//         .status(400)
+//         .send({ status: false, message: "Please enter data in body" });
+//     }
+
+//     let { status, orderId } = data;
+
+//     let customer = await customerModel.findOne({ _id: customerId });
+
+//     if (!customer) {
+//       return res
+//         .status(404)
+//         .send({ status: false, message: "Customer not found" });
+//     }
+
+//     if (!isValidObjectId(orderId)) {
+//       return res
+//         .status(400)
+//         .send({ status: false, message: "Invalid order id" });
+//     }
+
+//     let order = await orderModel.findOne({ _id: orderId });
+
+//     if (!order) {
+//       return res
+//         .status(404)
+//         .send({ status: false, message: "Order not found" });
+//     }
+
+//     let orderCustomerId = order.customerId.toString();
+
+//     if (orderCustomerId !== customerId) {
+//       return res.status(400).send({
+//         status: false,
+//         message: "This order does not belong to this customer",
+//       });
+//     }
+
+//     if (!isValidStatus(status)) {
+//       return res.status(400).send({
+//         status: false,
+//         message: "status should be only - 'pending', 'complete' or 'cancled'",
+//       });
+//     }
+
+//     let orderStatus = await orderModel.findOneAndUpdate(
+//       { _id: orderId },
+//       { $set: data },
+//       { new: true }
+//     );
+
+//     await cartModel.findOneAndUpdate(
+//       { customerId: customerId },
+//       { $set: {status: "cancelled"} },
+//       { new: true }
+//     );
+
+//     return res
+//       .status(200)
+//       .send({ status: true, message: "Success", data: orderStatus });
+//   } catch (error) {
+//     return res.status(500).send({ status: false, message: error.message });
+//   }
+// };
+
+
+// CANCEL ORDER BY ORDER ID
+
 const cancelOrderById = async (req, res) => {
   try {
-    let customerId = req.params.customerId;
-    if (!isValidObjectId(customerId)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Invalid customer id" });
-    }
-    let data = req.body;
-    if (!isValidRequestBody(data)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Please enter data in body" });
-    }
-
-    let { status, orderId } = data;
-
-    let customer = await customerModel.findOne({ _id: customerId });
-
-    if (!customer) {
-      return res
-        .status(404)
-        .send({ status: false, message: "Customer not found" });
-    }
-
+    let orderId = req.params.orderId;
     if (!isValidObjectId(orderId)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Invalid order id" });
+      return res.status(400).send({ status: false, message: 'Invalid order id'})
     }
 
-    let order = await orderModel.findOne({ _id: orderId });
-
-    if (!order) {
-      return res
-        .status(404)
-        .send({ status: false, message: "Order not found" });
-    }
-
-    let orderCustomerId = order.customerId.toString();
-
-    if (orderCustomerId !== customerId) {
-      return res.status(400).send({
-        status: false,
-        message: "This order does not belong to this customer",
-      });
-    }
-
-    if (!isValidStatus(status)) {
-      return res.status(400).send({
-        status: false,
-        message: "status should be only - 'pending', 'complete' or 'cancled'",
-      });
-    }
-
-    let orderStatus = await orderModel.findOneAndUpdate(
-      { _id: orderId },
-      { $set: data },
-      { new: true }
-    );
-
-    await cartModel.findOneAndUpdate(
-      { customerId: customerId },
-      { $set: {status: "cancelled"} },
-      { new: true }
-    );
-
-    return res
-      .status(200)
-      .send({ status: true, message: "Success", data: orderStatus });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
-};
+}
 
 module.exports = { createOrder, cancelOrderById };

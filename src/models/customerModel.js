@@ -1,3 +1,4 @@
+const { trimEnd } = require("lodash");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
@@ -5,23 +6,21 @@ const customerSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      trim: true,
+    },
+
+    customerId: {
+      type: String,
       trim: true,
     },
 
     email: {
       type: String,
       unique: true,
-      required: true,
       trim: true,
     },
 
-    gender: {
-      type: String,
-      required: true,
-    },
-
-    profileImage: {
+    dialingCode: {
       type: String,
       trim: true,
     },
@@ -36,30 +35,32 @@ const customerSchema = new mongoose.Schema(
       type: String,
       min: 8,
       max: 15,
-      required: true,
     },
 
-    otp: {
+    DOB: {
       type: String,
     },
-    
-    email_verified: {
-      type: Boolean,
-      default: false,
+
+    FCMToken: {
+      type: String,
+    },
+
+    gender: {
+      type: String,
     },
 
     address: {
       shipping: {
-        street: { type: String, trim: true, required: true },
-        city: { type: String, trim: true, required: true },
-        state: { type: String, trim: true, required: true },
-        pincode: { type: Number, required: true },
+        street: { type: String, trim: true },
+        city: { type: String, trim: true },
+        state: { type: String, trim: true },
+        pincode: { type: Number },
       },
       billing: {
-        street: { type: String, trim: true, required: true },
-        city: { type: String, trim: true, required: true },
-        city: { type: String, trim: true, required: true },
-        pincode: { type: Number, required: true },
+        street: { type: String, trim: true},
+        city: { type: String, trim: true},
+        city: { type: String, trim: true },
+        pincode: { type: Number },
       },
     },
   },

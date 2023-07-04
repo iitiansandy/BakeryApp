@@ -3,10 +3,16 @@ let ObjectId = mongoose.Schema.Types.ObjectId;
 
 const productSchema = new mongoose.Schema(
   {
-    title: {
+    skuCode: {
       type: String,
-      required: true,
-      unique: true,
+    },
+
+    isVeg: {
+      type: Boolean,
+    },
+
+    name: {
+      type: String,
       trim: true,
     },
 
@@ -16,24 +22,43 @@ const productSchema = new mongoose.Schema(
       trim: true,
     },
 
-    price: {
+    qty: {
       type: Number,
-      required: true,
-      trim: true,
     },
 
-    productImage: {
+    salePrice: {
+      type: Number,
+    },
+
+    mrp: {
+      type: Number,
+    },
+
+    thumbnail: {
       type: String,
     },
 
-    adminId: {
-      type: ObjectId,
-      ref: "Admin",
+    ratings: [
+      {
+        customerId: {
+          type: ObjectId,
+          ref: "Customer",
+        },
+        rating: {
+          type: Number,
+        },
+        comment: {
+          type: String,
+        },
+      },
+    ],
+
+    averageRating: {
+      type: Number,
     },
 
-    shopId: {
-      type: ObjectId,
-      ref: 'Shop'
+    totalRatingCount: {
+      type: Number,
     },
 
     deletedAt: { type: Date, default: null },

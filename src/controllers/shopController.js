@@ -1,25 +1,41 @@
-const shopModel = require('../models/shopModel');
-const productModel = require('../models/productModel');
-
+const shopModel = require("../models/shopModel");
+const productModel = require("../models/productModel");
+const { uploadImage } = require("../controllers/imageController");
 
 // CREATE SHOP
 const createShop = async (req, res) => {
-    try {
-        let data = req.body;
+  try {
+    let data = req.body;
 
-        let { shopNumber, shopAddress, products } = data;
+    let { 
+        shopNumber, 
+        shopAddress,
+        helplineNumber, 
+        description 
+    } = data;
 
-        
-        let shopData = {
-            shopNumber, shopAddress, products
-        }
+    let { images } = req.files;
 
-        let shop = await shopModel.create(shopData);
+    let img = await uploadImage(images);
 
-        return res.status(201).send({ status: true, message: 'Success', data: shop })
-    } catch (error) {
-        return res.status(500).send({ status: false, message: error.message })
-    }
-}
+    banners = img.imageURL;
 
-module.exports = { createShop }
+    let shopData = {
+      shopNumber,
+      shopAddress,
+      banners,
+      helplineNumber,
+      description
+    };
+
+    let shop = await shopModel.create(shopData);
+
+    return res
+      .status(201)
+      .send({ status: true, message: "Success", data: shop });
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+module.exports = { createShop };

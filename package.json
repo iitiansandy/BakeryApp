@@ -19,6 +19,7 @@
     "crypto": "^1.0.1",
     "dotenv": "^16.1.4",
     "express": "^4.18.2",
+    "express-fileupload": "^1.4.0",
     "fast-two-sms": "^3.0.0",
     "firebase": "^9.23.0",
     "firebase-admin": "^11.9.0",

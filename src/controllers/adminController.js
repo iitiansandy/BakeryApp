@@ -104,7 +104,7 @@ const loginAdmin = async (req, res) => {
       return res.status(400).send({
         status: false,
         message: `Password must include atleast one special character[@$!%?&], one uppercase, one 
-      lowercase, one number and should be mimimum 8 to 15 characters long for Example: Password@123`,
+      lowercase, one number and should be mimimum 12 to 25 characters long for Example: Password@123`,
       });
     }
 
