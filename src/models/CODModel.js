@@ -6,6 +6,10 @@ const CODSchema = new mongoose.Schema({
         type: String,
     },
 
+    customerId: {
+        type: String,
+    },
+
     fullName: {
         type: String,
     },

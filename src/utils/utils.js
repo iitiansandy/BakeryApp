@@ -27,7 +27,7 @@ const isValidEmail = function (gmail) {
 
 let isValidPassword = function (password) {
   let regexPassword =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,25}$/;
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/;
   return regexPassword.test(password);
 };
 
@@ -53,7 +53,7 @@ const isValidImg = (img) => {
 };
 
 function isValidStatus(value) {
-  if( ["pending", "completed", "cancled"].indexOf(value) == -1) {return false}
+  if( ["pending", "completed", "cancelled"].indexOf(value) == -1) {return false}
   else return true
 }
 

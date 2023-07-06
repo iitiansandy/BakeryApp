@@ -11,6 +11,7 @@ const checkoutCOD = async (req, res) => {
     let data = req.body;
     let {
       orderId,
+      customerId,
       fullName,
       mobile,
       GST,
@@ -39,6 +40,7 @@ const checkoutCOD = async (req, res) => {
 
     let checkoutData = {
       orderId,
+      customerId,
       fullName,
       mobile,
       GST,

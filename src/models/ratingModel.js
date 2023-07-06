@@ -11,7 +11,10 @@ const ratingSchema = new mongoose.Schema(
     ratings: [{
         customerId: {
             type: String,
-            ref: 'Customer'
+        },
+
+        name: {
+          type: String,
         },
 
         rating: {
@@ -20,6 +23,10 @@ const ratingSchema = new mongoose.Schema(
 
         comment: {
             type: String,
+        },
+
+        time: {
+          type: String,
         }
     }],
   },

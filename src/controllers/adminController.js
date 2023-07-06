@@ -100,15 +100,19 @@ const loginAdmin = async (req, res) => {
         .send({ status: false, message: "password is required" });
     }
 
-    // if (!isValidPassword(password)) {
-    //   return res.status(400).send({
-    //     status: false,
-    //     message: `Password must include atleast one special character[@$!%?&], one uppercase, one 
-    //   lowercase, one number and should be mimimum 12 to 25 characters long for Example: Password@123`,
-    //   });
-    // }
+    if (!isValidPassword(password)) {
+      return res.status(400).send({
+        status: false,
+        message: `Password must include atleast one special character[@$!%?&], one uppercase, one 
+      lowercase, one number and should be mimimum 8 to 15 characters long for Example: Password@123`,
+      });
+    }
 
     let admin = await adminModel.findOne({ email: email });
+    
+    if (!admin) {
+      return res.status(400).send({ status: false, message: 'Invalid email or password'});
+    }
 
     bcrypt.compare(password, admin.password, function (err, result) {
       if (err) {
@@ -136,7 +140,7 @@ const loginAdmin = async (req, res) => {
         res.setHeader("Authorization", "Bearer", token);
         delete data.password;
         return res.status(200).send({
-          status: false,
+          status: true,
           message: "Successfully loggedin",
           data: data,
         });

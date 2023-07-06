@@ -25,6 +25,8 @@ router.post("/login", adminController.loginAdmin);
 // CUSTOMER APIs
 router.post("/customer", customerController.signUpCustomer);
 router.post("/logincustomer", customerController.loginCustomer);
+router.get("/customers", customerController.getAllCustomers);
+router.get("/customer/:customerId", customerController.getCustomerById);
 router.put("/updatecustomer/:customerId", customerController.updateCustomerById);
 router.delete("/customer/:customerId", customerController.deleteCustomerById);
 
@@ -49,8 +51,8 @@ router.post("/customer/:customerId/cart", cartController.createCart);
 router.put("/customer/:customerId/cart", cartController.updateCart);
 
 // ORDER API
-router.post( "/customer/:customerId/order", orderController.createOrder );
-router.put("/customer/:customerId/order", orderController.cancelOrderById);
+router.post( "/checkout/:customerId", orderController.createOrder );
+router.put("/customer/:orderId/order", orderController.cancelOrderById);
 router.post("/customer/:customerId/addorder", order1Controller.newOrder);
 
 
@@ -59,7 +61,8 @@ router.post("/addrating", ratingController.addRating);
 router.get("/ratings", ratingController.getAllRatings);
 
 // DASHBOARD API
-router.get("/dashboard", dashboardController.createDashboard);
+router.get("/dashboard/:customerId", dashboardController.createDashboard);
+router.get("/dashboard", dashboardController.getDashboard);
 
 
 // RATING API

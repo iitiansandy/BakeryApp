@@ -44,12 +44,18 @@ const productSchema = new mongoose.Schema(
           type: ObjectId,
           ref: "Customer",
         },
+        name: {
+          type: String,
+        },
         rating: {
           type: Number,
         },
         comment: {
           type: String,
         },
+        time: {
+          type: String
+        }
       },
     ],
 
@@ -59,6 +65,10 @@ const productSchema = new mongoose.Schema(
 
     totalRatingCount: {
       type: Number,
+    },
+
+    ratingPercentages: {
+
     },
 
     deletedAt: { type: Date, default: null },

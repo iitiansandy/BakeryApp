@@ -38,4 +38,19 @@ const createShop = async (req, res) => {
   }
 };
 
+
+// GET ALL SHOPS
+const getAllShops = async (req, res) => {
+  try {
+    let shops = await shopModel.find();
+    if (!shops.length) {
+      return res.status(404).send({ status: false, message: 'No shop found'})
+    }
+
+    return res.status(200).send({ status: true, data: shops });
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+}
+
 module.exports = { createShop };

@@ -89,11 +89,12 @@ const { isValid } = require("../utils/utils");
 // ADD OR UPDATE A RATING FOR A PRODUCT
 async function addRating(req, res) {
   try {
-    const { productId, customerId, rating, comment } = req.body;
+    const { productId, customerId, name, rating, comment } = req.body;
 
     // Check if the product and customer exist
     const product = await productModel.findById(productId);
-    const customer = await customerModel.findById(customerId);
+    
+    const customer = await customerModel.findOne({customerId: customerId});
 
     if (!product) {
       return res.status(404).json({ error: "Product not found." });
@@ -110,11 +111,14 @@ async function addRating(req, res) {
 
     if (existingRating) {
       // Update the existing rating
+      existingRating.name = name;
       existingRating.rating = rating;
       existingRating.comment = comment;
+      existingRating.time = new Date().toLocaleString();
     } else {
       // Add a new rating
-      product.ratings.push({ customerId, rating, comment });
+      let time = new Date().toLocaleString();
+      product.ratings.push({ customerId, name, rating, comment, time });
     }
 
     // Calculate the new average rating and total rating counts
@@ -126,6 +130,36 @@ async function addRating(req, res) {
     // Update the averageRating and totalRatingCount fields in the product
     product.averageRating = averageRating;
     product.totalRatingCount = totalRatingCount;
+
+    // Count the number of customers who gave ratings of 5, 4, 3, 2, and 1
+    // const ratingCounts = {
+    //   5: 0,
+    //   4: 0,
+    //   3: 0,
+    //   2: 0,
+    //   1: 0,
+    // };
+
+    // ratings.forEach((rating) => {
+    //   if (rating.rating in ratingCounts) {
+    //     ratingCounts[rating.rating]++;
+    //   }
+    // });
+
+    // Update the ratingCounts field in the product
+    // product.ratingCounts = ratingCounts;
+
+    // Calculate the percentage of customers who gave ratings of 5, 4, 3, 2, and 1
+    const ratingPercentages = {};
+
+    for (let i = 1; i <= 5; i++) {
+      const ratingCount = ratings.filter((rating) => rating.rating === i).length;
+      const percentage = (ratingCount / totalRatingCount) * 100 || 0;
+      ratingPercentages[i] = percentage;
+    }
+
+    // Update the ratingPercentages field in the product
+    product.ratingPercentages = ratingPercentages;
 
     // Save the product
     await product.save();

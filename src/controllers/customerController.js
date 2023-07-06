@@ -149,6 +149,36 @@ const loginCustomer = async (req, res) => {
   }
 };
 
+// GET ALL CUSTOMERS
+const getAllCustomers = async (req, res) => {
+  try {
+    let customers = await customerModel.find();
+
+    if (!customers) {
+      return res.status(404).send({ status: false, message: 'No customer found'})
+    }
+    return res.status(200).send({ status: true, data: customers })
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+}
+
+
+// GET CUSTOMER BY CUSTOMER ID
+const getCustomerById = async (req, res) => {
+  try {
+    let customerId = req.params.customerId;
+    let customer = await customerModel.findOne({ customerId: customerId});
+    if (!customer) {
+      return res.status(404).send({ status: false, message: 'Customer Not found'});
+    }
+
+    return res.status(200).send({ status: true, data: customer})
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+}
+
 
 // UPDATE CUSTOMER
 const updateCustomerById = async (req, res) => {
@@ -201,7 +231,7 @@ const deleteCustomerById = async (req, res) => {
         .send({ status: false, message: "Invalid customer id" });
     }
     
-    let customer = await customerModel.findOne({ _id: customerId });
+    let customer = await customerModel.findOne({ customerId: customerId });
 
     if (!customer) {
       return res
@@ -209,8 +239,8 @@ const deleteCustomerById = async (req, res) => {
         .send({ status: false, message: "Customer not found" });
     }
 
-    let deleteCustomer = await customerModel.deleteOne({ _id: customerId });
-    if (!customer) {
+    let deleteCustomer = await customerModel.deleteOne({ customerId: customerId });
+    if (!deleteCustomer) {
       return res
         .status(404)
         .send({ status: false, message: "Customer already deleted" });
@@ -220,13 +250,15 @@ const deleteCustomerById = async (req, res) => {
       .status(200)
       .send({ status: true, message: "customer deleted successfully" });
   } catch (error) {
-    return res.status(500).send({ error: "error while verifing OTP" });
+    return res.status(500).send({ status: false, message: error.message });
   }
 };
 
 module.exports = {
   signUpCustomer,
   loginCustomer,
+  getAllCustomers,
+  getCustomerById,
   updateCustomerById,
   deleteCustomerById,
 };
