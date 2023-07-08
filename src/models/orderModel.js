@@ -2,11 +2,18 @@ const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const orderSchema = new mongoose.Schema({
+
+  orderID: {
+    type: Number
+  },
   CGST:{
     type: Number,
   },
   SGST:{
     type: Number,
+  },
+  totalProduct: {
+    type: Number
   },
   paymentType: {
     type: String,
@@ -56,6 +63,11 @@ const orderSchema = new mongoose.Schema({
   mobile: {
     type: String,
   },
+  status: {
+    type: String,
+    enum: ["Pending", "Approved", "Rejected", "Shipped", "Completed", "Cancel"],
+    default: "Pending"
+  },
   customerId: {
     type: String,
   },
@@ -65,7 +77,40 @@ const orderSchema = new mongoose.Schema({
         type: ObjectId,
         ref: 'Product',
       },
-      cart_qty: {
+      MrpTotal: {
+        type: Number,
+      },
+      SubTotal: {
+        type: Number
+      },
+      averageRating: {
+        type: Number
+      },
+      cartQty: {
+        type: Number
+      },
+      description: {
+        type: String,
+      },
+      isVeg: {
+        type: Boolean,
+      },
+      mrp: {
+        type: Number
+      },
+      name: {
+        type: String
+      },
+      salePrice: {
+        type: Number
+      },
+      skuCode: {
+        type: String,
+      },
+      thumbnail: {
+        type: String,
+      },
+      totalRatingCount: {
         type: Number
       }
     }

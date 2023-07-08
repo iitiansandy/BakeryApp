@@ -28,6 +28,10 @@ let adminSchema = new mongoose.Schema(
             required: true
         },
 
+        adminImg: {
+            type: String,
+        }
+
     }, { timestamps: true })
 
 module.exports = mongoose.model("Admin", adminSchema);

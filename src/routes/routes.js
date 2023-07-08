@@ -53,7 +53,12 @@ router.put("/customer/:customerId/cart", cartController.updateCart);
 // ORDER API
 router.post( "/checkout/:customerId", orderController.createOrder );
 router.put("/customer/:orderId/order", orderController.cancelOrderById);
-router.post("/customer/:customerId/addorder", order1Controller.newOrder);
+router.put("/order/:orderId", orderController.updateOrderById);
+router.get("/orders", orderController.getAllOrders);
+
+
+
+router.post("/customer/:customerId/addorder", order1Controller.createOrder);
 
 
 // RATING API

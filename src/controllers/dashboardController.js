@@ -11,7 +11,7 @@ const createDashboard = async (req, res) => {
 
     let products = await productModel.find({ isDeleted: false });
     let customer = await customerModel.findOne({ customerId: customerId }).select("-password");
-    let myOrder = await orderModel.findOne({ customerId: customerId });
+    let myOrder = await orderModel.find({ customerId: customerId });
     let storeDetails = await shopModel.find();
 
     return res.status(200).send({

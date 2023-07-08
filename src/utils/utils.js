@@ -53,7 +53,7 @@ const isValidImg = (img) => {
 };
 
 function isValidStatus(value) {
-  if( ["pending", "completed", "cancelled"].indexOf(value) == -1) {return false}
+  if( ["Pending", "Approved", "Rejected", "Shipped", "Completed", "Cancel"].indexOf(value) == -1) {return false}
   else return true
 }
 

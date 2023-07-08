@@ -2,6 +2,7 @@ const adminModel = require("../models/adminModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { tokenSecretKey } = require("../middlewares/config");
+const { uploadImage } = require('../controllers/imageController');
 
 const {
   isValid,
@@ -58,11 +59,18 @@ const createAdmin = async (req, res) => {
 
     password = hashedPassword;
 
+    let { images } = req.files;
+
+    let img = await uploadImage(images);
+
+    adminImg = img.imageURL;
+
     let adminData = {
       name,
       email,
       businessName,
       password,
+      adminImg
     };
 
     let admin = await adminModel.create(adminData);
@@ -135,8 +143,10 @@ const loginAdmin = async (req, res) => {
           tokenSecretKey,
           { expiresIn: "24h" }
         );
-        data.adminId = admin._id;
+        data.admin = admin;
+        data.admin.password = undefined;
         data.token = token;
+        data.email = undefined;
         res.setHeader("Authorization", "Bearer", token);
         delete data.password;
         return res.status(200).send({
