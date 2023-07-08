@@ -172,6 +172,48 @@ const getAllOrders = async (req, res) => {
 }
 
 
+// GET ALL TIME REVENUE
+const getAllTimeRevenue = async (req, res) => {
+  try {
+    let orders = await orderModel.find();
+
+    let grandTotal = 0;
+
+    for (let order of orders) {
+      grandTotal += order.grandTotal;
+    }
+
+    return res.status(200).send({ status: false, allTimeRevenue: grandTotal})
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+}
+
+
+// GET ONE DAY REVENUE
+const getOneDayRevenue = async (req, res) => {
+  try {
+    const date = new Date(req.params.date);
+    const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+
+    let orders = await orderModel.find({
+      createdAt: {$gte: startDate, $lt: endDate}
+    })
+
+    let grandTotal = 0;
+    
+    for (let order of orders) {
+      grandTotal += order.grandTotal;
+    }
+
+    return res.status(200).send({ status: true, oneDayRevenue: grandTotal})
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+}
+
+
 // UPDATE ORDER BY ORDERID
 const updateOrderById = async (req, res) => {
   try {
@@ -196,4 +238,4 @@ const updateOrderById = async (req, res) => {
   }
 }
 
-module.exports = { createOrder, cancelOrderById, getAllOrders, updateOrderById };
+module.exports = { createOrder, cancelOrderById, getAllOrders, getAllTimeRevenue, getOneDayRevenue, updateOrderById };

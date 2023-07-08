@@ -55,6 +55,8 @@ router.post( "/checkout/:customerId", orderController.createOrder );
 router.put("/customer/:orderId/order", orderController.cancelOrderById);
 router.put("/order/:orderId", orderController.updateOrderById);
 router.get("/orders", orderController.getAllOrders);
+router.get("/alltimerevenue", orderController.getAllTimeRevenue);
+router.get("/onedayrevenue/:date", orderController.getOneDayRevenue);
 
 
 
