@@ -71,6 +71,15 @@ const orderSchema = new mongoose.Schema({
   customerId: {
     type: String,
   },
+
+  question: {
+    type: String,
+  },
+
+  feedback: {
+    type: String,
+  },
+  
   productList: [
     {
       productId: {

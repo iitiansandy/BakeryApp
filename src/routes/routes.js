@@ -25,10 +25,10 @@ router.post("/login", adminController.loginAdmin);
 // CUSTOMER APIs
 router.post("/customer", customerController.signUpCustomer);
 router.post("/logincustomer", customerController.loginCustomer);
-router.get("/customers", customerController.getAllCustomers);
-router.get("/customer/:customerId", customerController.getCustomerById);
+router.get("/customers", Authentication, customerController.getAllCustomers);
+router.get("/customer/:customerId", Authentication, customerController.getCustomerById);
 router.put("/updatecustomer/:customerId", customerController.updateCustomerById);
-router.delete("/customer/:customerId", customerController.deleteCustomerById);
+router.put("/deleteaccount/:customerId", customerController.deleteCustomerById);
 
 // router.post("/loginwithotp", OTPController.loginCustomerWithOTP)
 
@@ -37,10 +37,11 @@ router.delete("/customer/:customerId", customerController.deleteCustomerById);
 
 
 // PRODUCT APIs
-router.post("/product", productController.createProduct);
+router.post("/product", Authentication, productController.createProduct);
 router.get("/products", productController.getAllProducts);
-router.put("/product/:productId", productController.updateProductById);
-router.delete("/product/:productId", productController.deleteProductById);
+router.get("/getproduct/:productId", productController.getProductById);
+router.put("/product/:productId", Authentication, productController.updateProductById);
+router.delete("/product/:productId", Authentication, productController.deleteProductById);
 
 // SHOP APIs
 router.post("/shop", shopController.createShop)
@@ -52,11 +53,11 @@ router.put("/customer/:customerId/cart", cartController.updateCart);
 
 // ORDER API
 router.post( "/checkout/:customerId", orderController.createOrder );
-router.put("/customer/:orderId/order", orderController.cancelOrderById);
+router.put("/cancelorder/:orderId", orderController.cancelOrderById);
 router.put("/order/:orderId", orderController.updateOrderById);
-router.get("/orders", orderController.getAllOrders);
-router.get("/alltimerevenue", orderController.getAllTimeRevenue);
-router.get("/onedayrevenue/:date", orderController.getOneDayRevenue);
+router.get("/orders", Authentication, orderController.getAllOrders);
+router.get("/alltimerevenue", Authentication, orderController.getAllTimeRevenue);
+router.get("/onedayrevenue/:date?", Authentication, orderController.getOneDayRevenue);
 
 
 

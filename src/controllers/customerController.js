@@ -19,7 +19,8 @@ const signUpCustomer = async (req, res) => {
   try {
     let data = req.body;
 
-    let { name, customerId, email, gender, DOB, mobile, password, address } = data;
+    let { name, customerId, email, gender, DOB, mobile, password, address } =
+      data;
 
     if (!isValid(name)) {
       return res
@@ -111,14 +112,16 @@ const signUpCustomer = async (req, res) => {
   }
 };
 
-
 // LOGIN CUSTOMER
 const loginCustomer = async (req, res) => {
   try {
     let data = req.body;
     let { customerId, dialingCode, mobile, HCFToken } = data;
 
-    let customer = await customerModel.findOne({ customerId: customerId, mobile: mobile });
+    let customer = await customerModel.findOne({
+      customerId: customerId,
+      mobile: mobile,
+    });
 
     if (!customer) {
       let loginData = {
@@ -132,18 +135,20 @@ const loginCustomer = async (req, res) => {
 
       return res
         .status(200)
-        .send({ status: true, 
+        .send({
+          status: true,
           message: "Login successfully",
-          loginData: loginData 
+          loginData: loginData,
         });
     } else {
       return res
         .status(200)
-        .send({ status: true, message: "Login successfully",
-        loginData: customer
+        .send({
+          status: true,
+          message: "Login successfully",
+          loginData: customer,
         });
     }
-
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
@@ -152,43 +157,48 @@ const loginCustomer = async (req, res) => {
 // GET ALL CUSTOMERS
 const getAllCustomers = async (req, res) => {
   try {
-    let customers = await customerModel.find();
+    let customers = await customerModel.find({isDeleted: false});
 
-    if (!customers) {
-      return res.status(404).send({ status: false, message: 'No customer found'})
-    }
-    return res.status(200).send({ status: true, data: customers })
+    // if (!customers.length) {
+    //   return res
+    //     .status(404)
+    //     .send({ status: false, message: "No customer found" });
+    // }
+    return res.status(200).send({ status: true, data: customers });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
-}
-
+};
 
 // GET CUSTOMER BY CUSTOMER ID
 const getCustomerById = async (req, res) => {
   try {
     let customerId = req.params.customerId;
-    let customer = await customerModel.findOne({ customerId: customerId});
+    let customer = await customerModel.findOne({ customerId: customerId, isDeleted: false });
     if (!customer) {
-      return res.status(404).send({ status: false, message: 'Customer Not found'});
+      return res
+        .status(404)
+        .send({ status: false, message: "Customer Not found" });
     }
 
-    return res.status(200).send({ status: true, data: customer})
+    return res.status(200).send({ status: true, data: customer });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
-}
-
+};
 
 // UPDATE CUSTOMER
 const updateCustomerById = async (req, res) => {
   try {
     let customerId = req.params.customerId;
 
-    let customer = await customerModel.findOne({ customerId: customerId });
-    let body = req.body;
+    let customer = await customerModel.findOne({ customerId: customerId, isDeleted: false });
 
-    // let { field, updatedData } = body;
+    if (!customer) {
+      return res.status(404).send({ status: false, message: 'Customer Not found'})
+    }
+
+    let body = req.body;
 
     if ("name" in body) {
       customer.name = body.name;
@@ -225,13 +235,11 @@ const deleteCustomerById = async (req, res) => {
   try {
     let customerId = req.params.customerId;
 
-    if (!isValidObjectId(customerId)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Invalid customer id" });
-    }
-    
-    let customer = await customerModel.findOne({ customerId: customerId });
+    let data = req.body;
+
+    let { question, feedback } = data;
+
+    let customer = await customerModel.findOne({ customerId: customerId, isDeleted: false });
 
     if (!customer) {
       return res
@@ -239,7 +247,23 @@ const deleteCustomerById = async (req, res) => {
         .send({ status: false, message: "Customer not found" });
     }
 
-    let deleteCustomer = await customerModel.deleteOne({ customerId: customerId });
+    let deleteCustomer = await customerModel.findOneAndUpdate(
+      {
+        customerId: customerId,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          isDeleted: true,
+          deletedAt: Date.now(),
+          question: question,
+          feedback: feedback,
+        },
+      },
+      {
+        new: true,
+      }
+    );
     if (!deleteCustomer) {
       return res
         .status(404)
@@ -248,7 +272,11 @@ const deleteCustomerById = async (req, res) => {
 
     return res
       .status(200)
-      .send({ status: true, message: "customer deleted successfully" });
+      .send({
+        status: true,
+        message: "customer deleted successfully",
+        data: data,
+      });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }

@@ -2,8 +2,8 @@ const orderModel = require("../models/orderModel");
 const productModel = require("../models/orderModel");
 const customerModel = require("../models/customerModel");
 const { isValidRequestBody, isValidStatus } = require("../utils/utils");
-const { generateRandomID } = require('../controllers/idGeneratorController');
-const { uploadImage } = require('../controllers/imageController');
+const { generateRandomID } = require("../controllers/idGeneratorController");
+const { uploadImage } = require("../controllers/imageController");
 
 // CREATE ORDER
 const createOrder = async (req, res) => {
@@ -17,7 +17,19 @@ const createOrder = async (req, res) => {
         .send({ status: false, message: "Please enter data in body" });
     }
 
-    let customer = await customerModel.findOne({ customerId: customerId });
+    let customer = await customerModel.findOne({
+      customerId: customerId,
+      isDeleted: false,
+    });
+
+    if (!customer) {
+      return res
+        .status(404)
+        .send({
+          status: false,
+          message: "Customer not found with this customer id",
+        });
+    }
 
     let {
       orderID,
@@ -56,7 +68,7 @@ const createOrder = async (req, res) => {
       name,
       salePrice,
       skuCode,
-      totalRatingCount
+      totalRatingCount,
     } = productList;
 
     // let { images } = req.files;
@@ -111,15 +123,10 @@ const createOrder = async (req, res) => {
 const cancelOrderById = async (req, res) => {
   try {
     let orderId = req.params.orderId;
-    if (!isValidObjectId(orderId)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Invalid order id" });
-    }
 
     let data = req.body;
 
-    let { status } = data;
+    let { status, question, feedback } = data;
 
     let order = await orderModel.findOne({ _id: orderId });
 
@@ -132,7 +139,8 @@ const cancelOrderById = async (req, res) => {
     if (!isValidStatus(status)) {
       return res.status(400).send({
         status: false,
-        message: 'status should be only - "Pending", "Approved", "Rejected", "Shipped", "Completed", or "Cancel"',
+        message:
+          'status should be only - "Pending", "Approved", "Rejected", "Shipped", "Completed", or "Cancel"',
       });
     }
 
@@ -144,33 +152,37 @@ const cancelOrderById = async (req, res) => {
 
     let orderStatus = await orderModel.findOneAndUpdate(
       { _id: orderId },
-      { $set: { status: "Cancel" } },
+      { $set: { status: "Cancel", question: question, feedback: feedback } },
       { new: true }
     );
 
+    await order.save();
+
     return res
       .status(200)
-      .send({ status: true, message: "Order cancelled successfully" });
+      .send({
+        status: true,
+        message: "Order cancelled successfully",
+        data: data,
+      });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
 };
 
-
 // GET ALL ORDERS
 const getAllOrders = async (req, res) => {
   try {
     let orders = await orderModel.find();
-    if (!orders.length) {
-      return res.status(404).send({ status: false, message: 'No order found' })
-    }
+    // if (!orders.length) {
+    //   return res.status(404).send({ status: false, message: "No order found" });
+    // }
 
-    return res.status(200).send({ status: true, data: orders })
+    return res.status(200).send({ status: true, data: orders });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
-}
-
+};
 
 // GET ALL TIME REVENUE
 const getAllTimeRevenue = async (req, res) => {
@@ -183,36 +195,47 @@ const getAllTimeRevenue = async (req, res) => {
       grandTotal += order.grandTotal;
     }
 
-    return res.status(200).send({ status: false, allTimeRevenue: grandTotal})
+    return res.status(200).send({ status: true, allTimeRevenue: grandTotal });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
-}
-
+};
 
 // GET ONE DAY REVENUE
 const getOneDayRevenue = async (req, res) => {
   try {
-    const date = new Date(req.params.date);
-    const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    const endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+    let date;
+    if (req.params.date) {
+      date = new Date(req.params.date);
+    } else {
+      date = new Date(); // Use today's date if no date is provided
+    }
+    const startDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    );
+    const endDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate() + 1
+    );
 
     let orders = await orderModel.find({
-      createdAt: {$gte: startDate, $lt: endDate}
-    })
+      createdAt: { $gte: startDate, $lt: endDate },
+    });
 
     let grandTotal = 0;
-    
+
     for (let order of orders) {
       grandTotal += order.grandTotal;
     }
 
-    return res.status(200).send({ status: true, oneDayRevenue: grandTotal})
+    return res.status(200).send({ status: true, oneDayRevenue: grandTotal });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
-}
-
+};
 
 // UPDATE ORDER BY ORDERID
 const updateOrderById = async (req, res) => {
@@ -222,7 +245,9 @@ const updateOrderById = async (req, res) => {
     let order = await orderModel.findOne({ _id: orderId });
 
     if (!order) {
-      return res.status(404).send({ status: false, message: 'Order Not found' })
+      return res
+        .status(404)
+        .send({ status: false, message: "Order Not found" });
     }
 
     let body = req.body;
@@ -232,10 +257,19 @@ const updateOrderById = async (req, res) => {
     }
 
     await order.save();
-    return res.status(200).send({ status: true, message: 'Order updated successfully' })
+    return res
+      .status(200)
+      .send({ status: true, message: "Order updated successfully" });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
-}
+};
 
-module.exports = { createOrder, cancelOrderById, getAllOrders, getAllTimeRevenue, getOneDayRevenue, updateOrderById };
+module.exports = {
+  createOrder,
+  cancelOrderById,
+  getAllOrders,
+  getAllTimeRevenue,
+  getOneDayRevenue,
+  updateOrderById,
+};

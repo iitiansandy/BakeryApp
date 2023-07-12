@@ -48,6 +48,14 @@ const customerSchema = new mongoose.Schema(
       type: String,
     },
 
+    question: {
+      type: String,
+    },
+
+    feedback: {
+      type: String,
+    },
+
     address: {
       shipping: {
         street: { type: String, trim: true },
@@ -56,14 +64,24 @@ const customerSchema = new mongoose.Schema(
         pincode: { type: Number },
       },
       billing: {
-        street: { type: String, trim: true},
-        city: { type: String, trim: true},
+        street: { type: String, trim: true },
+        city: { type: String, trim: true },
         city: { type: String, trim: true },
         pincode: { type: Number },
       },
     },
+
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+
+    deletedAt: {
+      type: Date,
+      default: null
+    }
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model( "Customer", customerSchema );
+module.exports = mongoose.model("Customer", customerSchema);

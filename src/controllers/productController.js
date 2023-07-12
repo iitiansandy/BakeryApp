@@ -59,14 +59,14 @@ const createProduct = async (req, res) => {
     await product.save();
 
     // Return the created product with average rating and total rating counts
-    res.status(201).json({
+    return res.status(201).json({
       product,
       averageRating,
       totalRatingCount,
     });
   } catch (error) {
     // Handle any errors that occur during the process
-    res.status(500).json({ error: "Failed to create product." });
+    return res.status(500).json({ error: "Failed to create product." });
   }
 }
 
@@ -75,17 +75,27 @@ const getAllProducts = async (req, res) => {
   try {
     let products = await productModel.find({isDeleted: false});
 
-    if (!products.length) {
-      return res
-        .status(404)
-        .send({ status: false, message: "No product found" });
-    }
-
-    return res.status(200).send({ status: false, data: products });
+    return res.status(200).send({ status: true, data: products });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
 };
+
+
+// GET PRODUCT BY PRODUCT ID
+const getProductById = async (req, res) => {
+  try {
+    let productId = req.params.productId;
+    let product = await productModel.findOne({_id: productId})
+    if (!product) {
+      return res.status(404).send({ status: false, message: 'Product not found'})
+    }
+
+    return res.status(200).send({ status: true, data: product})
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message })
+  }
+}
 
 // UPDATE PRODUCT BY PRODUCT ID
 const updateProductById = async (req, res) => {
@@ -185,6 +195,7 @@ const deleteProductById = async (req, res) => {
 module.exports = {
   createProduct,
   getAllProducts,
+  getProductById,
   updateProductById,
   deleteProductById,
 };
