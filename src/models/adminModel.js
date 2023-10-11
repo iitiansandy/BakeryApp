@@ -15,12 +15,6 @@ let adminSchema = new mongoose.Schema(
             trim: true,
         },
 
-        businessName: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-
         password: {
             type: String,
             min: 8,

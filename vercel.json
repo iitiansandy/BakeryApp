@@ -1,6 +1,6 @@
 {
     "version": 2,
-    "name": "bakery-backend",
+    "name": "citas-backend",
     "builds": [
        { "src": "index.js", "use": "@vercel/node" }
     ],

@@ -1,5 +1,5 @@
 const adminModel = require("../models/adminModel");
-const customerModel = require("../models/customerModel");
+const customerModel = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const { tokenSecretKey } = require("./config");
 const { isValidObjectId } = require("mongoose");
